@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { exerciseData } from './data/exercises';
 import { db, WorkoutEntry } from './db/database';
+import Settings from './components/Settings';
 
 type Exercise = {
   name: string;
@@ -25,6 +26,7 @@ export default function App() {
   const [currentSession, setCurrentSession] = useState(1);
   const [workoutStates, setWorkoutStates] = useState<Record<string, WorkoutState>>({});
   const [showHistory, setShowHistory] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
   const [history, setHistory] = useState<WorkoutEntry[]>([]);
   const [exerciseHistory, setExerciseHistory] = useState<Record<string, ExerciseHistory[]>>({});
 
@@ -110,11 +112,22 @@ export default function App() {
           </h1>
           <div className="flex gap-4">
             <button
-              onClick={() => setShowHistory(!showHistory)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              onClick={() => {
+                setShowHistory(false);
+                setShowSettings(!showSettings);
+              }}
+              className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600"
             >
-              {showHistory ? 'Current Workout' : 'History'}
+              {showSettings ? 'Workout' : 'Settings'}
             </button>
+            {!showSettings && (
+              <button
+                onClick={() => setShowHistory(!showHistory)}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+              >
+                {showHistory ? 'Current Workout' : 'History'}
+              </button>
+            )}
             <button
               onClick={() => setDarkMode(!darkMode)}
               className="p-2 rounded-lg bg-gray-200 dark:bg-gray-700"
@@ -124,7 +137,9 @@ export default function App() {
           </div>
         </header>
 
-        {!showHistory ? (
+        {showSettings ? (
+          <Settings />
+        ) : !showHistory ? (
           <>
             <div className="flex gap-4 mb-8">
               <select
