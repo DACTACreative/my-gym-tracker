@@ -4,7 +4,6 @@ import { db, WorkoutEntry } from './db/database';
 
 type Exercise = {
   name: string;
-  image: string;
   video: string;
   weight: number;
   reps: number;
@@ -15,12 +14,19 @@ type WorkoutState = {
   reps: number;
 };
 
+type ExerciseHistory = {
+  date: Date;
+  weight: number;
+  reps: number;
+};
+
 export default function App() {
   const [darkMode, setDarkMode] = useState(false);
   const [currentSession, setCurrentSession] = useState(1);
   const [workoutStates, setWorkoutStates] = useState<Record<string, WorkoutState>>({});
   const [showHistory, setShowHistory] = useState(false);
   const [history, setHistory] = useState<WorkoutEntry[]>([]);
+  const [exerciseHistory, setExerciseHistory] = useState<Record<string, ExerciseHistory[]>>({});
 
   // Load history on component mount
   useEffect(() => {
@@ -30,6 +36,20 @@ export default function App() {
   const loadHistory = async () => {
     const allWorkouts = await db.workouts.orderBy('date').reverse().toArray();
     setHistory(allWorkouts);
+
+    // Group history by exercise
+    const historyByExercise: Record<string, ExerciseHistory[]> = {};
+    allWorkouts.forEach(workout => {
+      if (!historyByExercise[workout.exerciseName]) {
+        historyByExercise[workout.exerciseName] = [];
+      }
+      historyByExercise[workout.exerciseName].push({
+        date: new Date(workout.date),
+        weight: workout.weight,
+        reps: workout.reps
+      });
+    });
+    setExerciseHistory(historyByExercise);
   };
 
   const handleWorkoutChange = async (exerciseName: string, field: 'weight' | 'reps', value: number) => {
@@ -135,20 +155,32 @@ export default function App() {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {currentExercises.map((exercise) => {
                 const state = workoutStates[exercise.name] || { weight: 0, reps: 0 };
+                const exerciseHistoryData = exerciseHistory[exercise.name] || [];
+                const personalBest = exerciseHistoryData.reduce((max, entry) => 
+                  entry.weight > max ? entry.weight : max, 0);
+
                 return (
                   <div
                     key={exercise.name}
                     className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
                   >
-                    <img
-                      src={exercise.image}
-                      alt={exercise.name}
-                      className="w-full h-48 object-cover"
-                    />
                     <div className="p-4">
                       <h3 className="text-xl font-semibold mb-2 dark:text-white">
                         {exercise.name}
                       </h3>
+                      
+                      {/* Exercise History */}
+                      <div className="mb-4 text-sm text-gray-600 dark:text-gray-300">
+                        <p className="font-semibold">Personal Best: {personalBest} kg</p>
+                        <div className="mt-2 space-y-1">
+                          {exerciseHistoryData.slice(0, 3).map((entry, idx) => (
+                            <p key={idx}>
+                              {entry.date.toLocaleDateString()}: {entry.weight}kg × {entry.reps} reps
+                            </p>
+                          ))}
+                        </div>
+                      </div>
+
                       <div className="space-y-4">
                         <div className="flex gap-4">
                           <div className="flex-1">
