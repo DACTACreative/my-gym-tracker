@@ -3,14 +3,10 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{html,css}",
   ],
-  darkMode: 'class',
   theme: {
-    extend: {
-      fontFamily: {
-        sans: ['Inter var', 'sans-serif'],
-      },
-    },
+    extend: {},
   },
   plugins: [],
 }

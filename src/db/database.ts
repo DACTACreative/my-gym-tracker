@@ -7,17 +7,35 @@ export interface WorkoutEntry {
   exerciseName: string;
   weight: number;
   reps: number;
+  userId: string;
 }
 
-export class GymDatabase extends Dexie {
+export interface User {
+  id?: number;
+  username: string;
+  sessions: {
+    id: number;
+    name: string;
+    exercises: Array<{
+      name: string;
+      video: string;
+      weight: number;
+    }>;
+  }[];
+  createdAt: Date;
+}
+
+export class MyGymTrackerDB extends Dexie {
   workouts!: Table<WorkoutEntry>;
+  users!: Table<User>;
 
   constructor() {
-    super('GymDatabase');
-    this.version(1).stores({
-      workouts: '++id, date, sessionNumber, exerciseName'
+    super('MyGymTrackerDB');
+    this.version(2).stores({
+      workouts: '++id, date, sessionNumber, exerciseName, userId',
+      users: '++id, username'
     });
   }
 }
 
-export const db = new GymDatabase();
+export const db = new MyGymTrackerDB();
