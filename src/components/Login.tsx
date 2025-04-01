@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { db, User } from '../db/database';
 import { exerciseData } from '../data/exercises';
 
+const ALLOWED_USERS = ['CELIA', 'EUNICE'];
+
 interface LoginProps {
   onLogin: (user: User) => void;
 }
@@ -16,14 +18,25 @@ export default function Login({ onLogin }: LoginProps) {
     setIsLoading(true);
     setError('');
 
+    const formattedUsername = username.trim().toUpperCase();
+
+    if (!ALLOWED_USERS.includes(formattedUsername)) {
+      setError('You are not invited to this app yet.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
+      // Delete all users first
+      await db.users.clear();
+
       // Check if user exists
-      let user = await db.users.where('username').equals(username).first();
+      let user = await db.users.where('username').equals(formattedUsername).first();
 
       // If user doesn't exist, create new user
       if (!user) {
         const newUser: User = {
-          username,
+          username: formattedUsername,
           sessions: exerciseData.map((session, index) => ({
             id: index + 1,
             name: `Session ${index + 1}`,
@@ -45,64 +58,52 @@ export default function Login({ onLogin }: LoginProps) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-purple-600 to-blue-500 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-xl">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
-            Welcome to FitForLife
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
-            Your personal gym tracking companion
+    <div className="min-h-screen flex items-center justify-center bg-[#1A1C20]">
+      <div className="w-full max-w-md px-8 py-12">
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold text-white mb-2">
+            VOLUME UP YOUR BODY GOALS
+          </h1>
+          <p className="text-gray-400">
+            Track your progress. Achieve your goals.
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+
+        <div className="bg-[#2A2C30] rounded-3xl p-8 shadow-xl">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label htmlFor="username" className="sr-only">
-                Username
-              </label>
               <input
-                id="username"
-                name="username"
                 type="text"
-                required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="appearance-none rounded-lg relative block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 placeholder-gray-500 text-gray-900 dark:text-white dark:bg-gray-700 focus:outline-none focus:ring-purple-500 focus:border-purple-500 focus:z-10 sm:text-sm"
                 placeholder="Enter your username"
+                className="w-full px-4 py-3 bg-[#1A1C20] text-white rounded-xl border-2 border-[#3A3C40] focus:border-[#CCFF00] focus:outline-none transition-colors"
               />
             </div>
-          </div>
 
-          {error && (
-            <div className="text-red-500 text-sm text-center">{error}</div>
-          )}
+            {error && (
+              <div className="text-red-500 text-sm text-center bg-red-500/10 py-2 rounded-lg">
+                {error}
+              </div>
+            )}
 
-          <div>
             <button
               type="submit"
               disabled={isLoading}
-              className={`group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white ${
+              className={`w-full py-3 rounded-xl text-black font-semibold text-lg transition-all duration-200 ${
                 isLoading
-                  ? 'bg-purple-400'
-                  : 'bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500'
+                  ? 'bg-[#CCFF00]/50'
+                  : 'bg-[#CCFF00] hover:bg-[#CCFF00]/90'
               }`}
             >
-              {isLoading ? 'Loading...' : 'Start Training'}
+              {isLoading ? 'Loading...' : 'START BUILDING YOUR BODY'}
             </button>
-          </div>
-        </form>
+          </form>
 
-        <div className="mt-6">
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                Built with ❤️ by FitForLife Team
-              </span>
-            </div>
+          <div className="mt-6 text-center">
+            <p className="text-sm text-gray-500">
+              Only invited users can access this app
+            </p>
           </div>
         </div>
       </div>

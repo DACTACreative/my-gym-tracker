@@ -79,17 +79,17 @@ export const exerciseData = [
       },
       {
         name: "Dumbbell Swings",
-        video: "https://www.youtube.com/embed/YlipJqZhvvs",
+        video: "https://www.youtube.com/watch?v=uB-fq0HqGK0",
         weight: 0
       },
       {
         name: "Dumbbell Clean & Press",
-        video: "https://www.youtube.com/embed/sOPB6Q4EFwo",
+        video: "https://www.youtube.com/watch?v=sZ4XMWn8bAU",
         weight: 0
       },
       {
         name: "Step-Ups",
-        video: "https://www.youtube.com/embed/WCFCdxzFBa4",
+        video: "https://www.youtube.com/watch?v=dQqApCGd5Ss",
         weight: 0
       },
       {
